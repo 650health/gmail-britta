@@ -4,6 +4,7 @@ module GmailBritta
     def merged?; @merged ; end
 
     def initialize(parent)
+      @merged = false
       @parent = parent
       super(parent.filterset, :log => parent.logger)
     end
