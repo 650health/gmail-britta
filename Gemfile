@@ -3,7 +3,7 @@ source "https://rubygems.org"
 # We require ruby 2.1.0 or above:
 ruby ">= 2.1.0"
 
-gem 'haml', '~> 3.1.6'
+gem 'haml', '~> 5.1.2'
 gem "simplecov", group: :test, require: nil
 
 
