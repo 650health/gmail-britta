@@ -75,6 +75,25 @@ ATOM
       end
     end
 
+    def to_json
+      result = {
+        version: "v1alpha3",
+        author: {
+          name: "YOUR NAME HERE (auto imported)",
+          email: "your-email@gmail.com"
+        },
+        rules: [],
+        # TODO Manage labels manually for now as gmail-britta does not
+        #      care about them and let Gmail to manage it on xml import
+        # labels: []
+      }
+      filters.each do |filter|
+        result[:rules] << filter.to_hash
+      end
+
+      JSON.pretty_generate(result)
+    end
+
     private
     def allocate_logger
       logger = Logger.new(STDERR)

@@ -225,6 +225,13 @@ module GmailBritta
       engine.render(self)
     end
 
+    def to_hash
+      {
+        filter: { query: gmail_query_string },
+        actions: actions_hash,
+      }
+    end
+
     # Evaluate block as a filter definition block and register `self` as a filter on the containing {FilterSet}
     # @note this method gets called by {Delegate#filter} to create and register a new filter object
     # @yield The filter definition. `self` in the block is the new filter object.
@@ -310,5 +317,44 @@ module GmailBritta
       end
       properties
     end
+
+    # to_hash helpers
+
+    def gmail_query_string
+      query = output_has
+      if defined_has_not?
+        query +=" -{#{output_has_not}}"
+      end
+      query
+    end
+
+    def actions_hash
+      actions = {}
+      labels = []
+
+      {
+        archive: "archive",
+        delete_it: "delete",
+        mark_read: "markRead",
+        mark_important: "markImportant",
+        star: "star"
+      }.each do |britta_name, gmailctl_name|
+        if self.send("defined_#{britta_name}?".intern)
+          actions[gmailctl_name] = true
+        end
+      end
+
+      actions["markImportant"] = false if defined_mark_unimportant?
+      actions["markSpam"] = false if defined_never_spam?
+
+      labels << output_label if defined_label?
+      labels << output_smart_label if defined_smart_label?
+
+      actions["labels"] = labels unless labels.empty?
+      actions["forward"] = output_forward_to if defined_forward_to?
+
+      actions
+    end
+
   end
 end

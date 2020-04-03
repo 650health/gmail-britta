@@ -8,6 +8,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'time'
 require 'haml'
+require 'json'
 require 'logger'
 
 require 'gmail-britta/single_write_accessors'
