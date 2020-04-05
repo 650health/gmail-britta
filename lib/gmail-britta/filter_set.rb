@@ -16,6 +16,8 @@ module GmailBritta
     # @see GmailBritta::Filter#archive_unless_directed
     attr_accessor :filters
 
+    attr_accessor :labels
+
     # The list of emails that belong to the user running this {FilterSet} definition
     # @see GmailBritta.filterset
     attr_accessor :me
@@ -66,6 +68,10 @@ ATOM
         GmailBritta::Filter.new(@britta, :log => @log).perform(&block)
       end
 
+      def labels(labels)
+        @britta.labels = labels
+      end
+
       # Evaluate the {FilterSet} definition block with the {Delegate} object as `self`
       # @api private
       # @note this method will typically only be called by {FilterSet#rules}
@@ -81,14 +87,31 @@ ATOM
         author: {
           name: "YOUR NAME HERE (auto imported)",
           email: "your-email@gmail.com"
-        },
-        rules: [],
-        # TODO Manage labels manually for now as gmail-britta does not
-        #      care about them and let Gmail to manage it on xml import
-        # labels: []
+        }
       }
+      labels = @labels
+      rules = []
+
       filters.each do |filter|
-        result[:rules] << filter.to_hash
+        rule = filter.to_hash
+        if rule[:actions] and rule[:actions]["labels"]
+          labels += rule[:actions]["labels"]
+        end
+        rules << rule
+      end
+
+      unless labels.empty?
+        result[:labels] =
+          labels
+          .sort
+          .uniq
+          .map do |name|
+            {:name => name}
+          end
+      end
+
+      unless rules.empty?
+        result[:rules] = rules
       end
 
       JSON.pretty_generate(result)
